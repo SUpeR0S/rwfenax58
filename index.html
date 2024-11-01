@@ -5,9 +5,299 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.min.js"></script>
     <title>RWorldBot</title>
+    <script type="text/javascript">
+        const itemListURL = "https://raw.githubusercontent.com/itsrec0very/rworldbot/master/itemlist.json";
+        const eventListURL = "https://raw.githubusercontent.com/itsrec0very/rworldbot/master/eventlist.json";
+    </script>
 </head>
-  
-<body></body>
-  
+
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">Forked by itsrec0very</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Главная <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://www.twitch.tv/loskych">Назад на стрим</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main role="main">
+        <div class="jumbotron">
+            <div class="container">
+                <h1 class="display-3">RWorldBot(Twitch Toolkit)</h1>
+                <p>Данный мод написан hodlhodl, который интегрирует сюжетные решения в голосования в чате, награждает зрителей монетами за просмотр, а эти монеты можно потратить на предметы/события в игре.</p>
+		<p>Перевел itsrec0very, специально для loskych.</p>
+		<h1 style="color:red; font-family:verdana;">ВНИМАНИЕ!</h1>
+		<p>У каждой команды/предмета/события есть собственная задерждка, если бот не обрабатывает вашу команду, это не значит, что он сразу сломался. В кд команда может уйти, даже если вы ввели неправильно команду/не хватило монет.</p>
+		<p>Текущие задержки:</p>
+		<p>!купить: <b>5 минут</b></p>
+		<p>!баланс: <b>5 минут</b></p>
+		<p>!флиртовать/подушам/оскорбить: <b>5 минут</b></p>
+		<p>События: <b>в зависимости от типа / 7 игровых дней</b></p>
+		
+		    
+                <ul class="list-group">
+		    <li class="list-group-item">!всекоманды - все доступные команды</li>
+                    <li class="list-group-item">!очередь - встать в очередь поселенцев</li>
+                    <li class="list-group-item">!флиртовать (ник) - флиртовать с кем-либо</li>
+		    <li class="list-group-item">!подушам (ник) - поговорить с кем-либо</li>
+                    <li class="list-group-item">!оскорбить (ник) - оскорбить кого-либо</li>
+		    <li class="list-group-item">!свадьба (ник) - предложение руки и сердца</li>
+                    <li class="list-group-item">!карма - все подробности функционала кармы</li>
+		    <li class="list-group-item">!заработок - текущий заработок монет</li>
+		    <li class="list-group-item">!баланс - текущий баланс монет и кармы</li>
+			
+		<h1 style="color:; font-family:verdana;">Раздел покупок &#129297;</h1>
+		    <li class="list-group-item">!купить pawn - покупка поселенца, цена 10к.</li>
+		    <li class="list-group-item">!купить (ID предмета) (кол-во) - покупка предметов</li>
+		    <li class="list-group-item">!купить (ID события) - покупка событий</li>
+		    <li class="list-group-item">!купить wear (ID одежды) - покупка одежды</li>
+		    <li class="list-group-item">!купить wear (ID снаряжения) - покупка снаряжения</li>
+		<p>Пока на стриме доступны только эти команды, постепенно будем добавлять ещё...</p>
+		<p></p>
+		<p>В выпадающем списке вы можете посмотреть доступные предметы и события для покупки!</p>
+                </ul>
+            </div>
+        </div>
+        <div ng-app='tabs' ng-controller='tabCtrl'>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class='tabs'>
+                            <form>
+                                <div class="form-group">
+                                    <button class="btn btn-success" ng-class="{'active': (selected == '1')}" ng-click='selected=1'>
+                                        Предметы
+                                    </button>
+                                    <button class="btn btn-success" ng-class="{'active': (selected == '2')}" ng-click='selected=2'>
+                                        События
+                                    </button>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label" for="">Цена:</label>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" id="item-price-min" placeholder="0">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input type="number" class="form-control" id="item-price-max" placeholder="100000">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show='selected == 1'>
+                    <div class="col-md-12">
+                        <div id="items">
+                            <div class="input-group input-group-sm mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inputGroup-sizing-sm">Поиск</span>
+                                </div>
+                                <input type="text" class="form-control search" aria-label="Search" aria-describedby="inputGroup-sizing-sm">
+                            </div>
+                            <p>
+                                <button type="button" class="btn btn-primary sort" data-sort="abr">
+                                    А-Я
+                                </button>
+                                <button type="button" class="btn btn-primary sort" data-sort="price">
+                                    Цена
+                                </button>
+                            </p>
+                            <table class="table items">
+                                <tr>
+                                    <th scope="col" class="sort" data-sort="abr">ID</th>
+                                    <th scope="col" class="sort" data-sort="price">Цена</th>
+                                    <th scope="col" class="sort" data-sort="category">Категория</th>
+                                </tr>
+                                <tbody class="list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show='selected == 2'>
+                    <div class="col-md-12">
+                        <div id="events">
+                            <div class="input-group input-group-sm mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inputGroup-sizing-sm">Поиск</span>
+                                </div>
+                                <input type="text" class="form-control search" aria-label="Search" aria-describedby="inputGroup-sizing-sm">
+                            </div>
+                            <p>
+                                <button type="button" class="btn btn-primary sort" data-sort="abr">
+                                    A-Z
+                                </button>
+                                <button type="button" class="btn btn-primary sort" data-sort="price">
+                                    Цена
+                                </button>
+                                <button type="button" class="btn btn-primary sort" data-sort="karmatype">
+                                    Карма
+                                </button>
+                            </p>
+                            <table class="table events">
+                                <tr>
+                                    <th scope="col" class="sort" data-sort="abr">ID</th>
+                                    <th scope="col" class="sort" data-sort="price">Цена</th>
+                                    <th scope="col" class="sort" data-sort="karmatype">Тип кармы</th>
+                                </tr>
+                                <tbody class="list">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!-- Example row of columns -->
+            <div class="row">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <hr>
+        </div>
+    </main>
+    <footer class="text-muted">
+        <div class="container">
+            <p class="float-right">
+                <a href="#">Наверх</a>
+            </p>
+            <p>Forked by itsrec0very with © Bootstrap</p>
+        </div>
+    </footer>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://embed.twitch.tv/embed/v1.js"></script>
+    <style>
+        .sort:after {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            content: "";
+            position: relative;
+            top: -10px;
+            right: -5px;
+        }
+        
+        .sort.asc:after {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #fff;
+            content: "";
+            position: relative;
+            top: 4px;
+            right: -5px;
+        }
+        
+        .sort.desc:after {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid #fff;
+            content: "";
+            position: relative;
+            top: -4px;
+            right: -5px;
+        }
+    </style>
+    <script type="text/javascript">
+        let itemList = null;
+        $.getJSON(itemListURL, function(data) {
+            var options = {
+                valueNames: ['abr', 'price', 'category'],
+                item: '<tr><td class="abr" scope="row"></td><td class="price"></td><td class="category"></td></tr>'
+            };
+
+            var itemData = [];
+            $.each(data.items, function(index, value) {
+                if (value["price"] > 0) {
+                    itemData.push(value);
+                }
+            });
+
+            itemList = new List('items', options, itemData);
+        });
+
+        let eventList = null;
+        $.getJSON(eventListURL, function(data) {
+            var options = {
+                valueNames: ['abr', 'price', 'karmatype'],
+                item: '<tr><td class="abr" scope="row"></td><td class="price"></td><td class="karmatype"></td></tr>'
+            };
+
+            var eventData = [];
+            $.each(data.incitems, function(index, value) {
+                if (value["price"] > 0) {
+                    eventData.push(value);
+                }
+            });
+
+            eventList = new List('events', options, eventData);
+        });
+
+        $("#item-price-min").keyup(function() {
+            updateItemFilter();
+        });
+
+        $("#item-price-max").keyup(function() {
+            updateItemFilter();
+        });
+
+        function updateItemFilter() {
+            var minPrice = $("#item-price-min").val();
+            var maxPrice = $("#item-price-max").val();
+            itemList.filter(function(item) {
+                var allow = true;
+                if (minPrice != "" && parseInt(item.values().price) < minPrice) {
+                    allow = false;
+                }
+                if (maxPrice != "" && parseInt(item.values().price) > maxPrice) {
+                    allow = false;
+                }
+                return allow;
+            });
+	    eventList.filter(function(item) {
+                var allow = true;
+                if (minPrice != "" && parseInt(item.values().price) < minPrice) {
+                    allow = false;
+                }
+                if (maxPrice != "" && parseInt(item.values().price) > maxPrice) {
+                    allow = false;
+                }
+                return allow;
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        var tabs = angular.module('tabs', [])
+            .controller('tabCtrl', function($scope) {
+                $scope.selected = "1";
+            });
+    </script>
+</body>
+
 </html>
